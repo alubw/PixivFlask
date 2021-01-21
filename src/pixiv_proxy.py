@@ -151,10 +151,11 @@ def pixiv() -> None:
     for t in config.CHOICEMODE:
         try:
             items[t] = apiRanking(api, t)  # 获取t类型排行榜列表
-        except:
-            logger.error("获取" + t + "类型排行榜失败")
+        except Exception as e:
+            logger.error("获取" + t + "类型排行榜失败(" + str(e) + ")")
             # 获取失败，尝试下一类型
             continue
+    for t in config.CHOICEMODE:
         for item in items[t]:
             # 超过设定值不下载
             if config.MAXCOUNT and item['count'] > config.MAXCOUNT:
