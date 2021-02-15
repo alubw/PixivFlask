@@ -13,6 +13,7 @@ from .logger import logger
 import subprocess
 import socket
 import socks
+from .auth import refresh
 socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 10808)
 socket.socket = socks.socksocket
 
@@ -30,11 +31,11 @@ def apiLogin() -> pixivpy3.AppPixivAPI:
     api = pixivpy3.AppPixivAPI()
     # api.require_appapi_hosts()
     api.set_accept_language('en-us')
-    if config.PIXIV_USERNAME != "username" and config.PIXIV_PASSWORD != "password":
-        api.login(config.PIXIV_USERNAME, config.PIXIV_PASSWORD)
+    if config.REFRESH_TOKEN:
+        api.auth(refresh_token=refresh(api.hosts, config.REFRESH_TOKEN))
         logger.info("Pixiv登录成功")
     else:
-        raise Exception("请在config.py文件中设置账号密码")
+        raise Exception("请设置refresh_token")
     return api
 
 
@@ -73,10 +74,10 @@ def isValidImage(pathfile):
 
 
 # 图片下载并创建缩略图
-def apiDownload(api: pixivpy3.AppPixivAPI, item: dict) -> None:
+def apiDownload(persent: str, api: pixivpy3.AppPixivAPI, item: dict) -> None:
     # item = {"illust": illust, "title": title,
     #         "count": count, "tags": tags, "url": url, "suffix": suffix}
-    logger.info("尝试下载 " + str(item['illust']) + ':' + item['title'])
+    logger.info("[" + persent + "]尝试下载 " + str(item['illust']) + ':' + item['title'])
     # 检测PATH是否存在，不存在则创建
     # 当日图片根文件夹
     basePath = os.path.join(define.STATICPATH, config.IMGPATH)
@@ -148,9 +149,12 @@ def pixiv() -> None:
             if trytime > 10:
                 return
     items = {}
+    length = 0
+    pos = 0
     for t in config.CHOICEMODE:
         try:
             items[t] = apiRanking(api, t)  # 获取t类型排行榜列表
+            length += len(items[t])
         except Exception as e:
             logger.error("获取" + t + "类型排行榜失败(" + str(e) + ")")
             # 获取失败，尝试下一类型
@@ -158,6 +162,8 @@ def pixiv() -> None:
     for t in config.CHOICEMODE:
         for item in items[t]:
             # 超过设定值不下载
+            pos += 1
+            persent = str(round(pos*100/length, 2)) + '%'
             if config.MAXCOUNT and item['count'] > config.MAXCOUNT:
                 logger.debug("count超过设定值" + str(config.MAXCOUNT) +
                              " " + str(item['illust']) + ":" + item['title'])
@@ -166,7 +172,7 @@ def pixiv() -> None:
                 conn = dbconnect()
                 if not dbifhave(conn, "illustJsonMsg", item["illust"]):
                     # 下载到本地
-                    apiDownload(api, item)
+                    apiDownload(persent, api, item)
                     # 下载完成，写入数据库
                     dbinsert(conn, t, item["illust"], item)
                 dbclose(conn)

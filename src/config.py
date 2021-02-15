@@ -25,8 +25,10 @@ IMGPATH = "img"
 FLASK_PASSWORD = "passwd"
 
 # pixiv账号密码
-PIXIV_USERNAME = "username"
-PIXIV_PASSWORD = "password"
+# PIXIV_USERNAME = "username"
+# PIXIV_PASSWORD = "password"
+with open(path.join(define.PATHDIR, "token"),'r') as f:
+    REFRESH_TOKEN = f.read()
 
 # 是否启用代理图床站(pixiv.cat)
 USECAT = True

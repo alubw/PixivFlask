@@ -1,5 +1,7 @@
 # PixivFlask
 
+自用，看着会比较乱，readme的东西也很旧了很久没更新。以后有机会再重写。
+
 ## 架构
 
 前端：HTML5 + CSS(Less) + JavaScript(JQuery)  -  **不支持IE**

@@ -155,7 +155,7 @@ def dbgetitems(conn: sqlite3.Connection,  typelist: list, time: int = 0) -> list
         if i[0] not in rtjson.keys():
             rtjson[i[0]] = []
         rtjson[i[0]].append(json.loads(i[1]))
-    logger.info(str(rtjson))
+    logger.debug(str(rtjson))
     return rtjson
 
 

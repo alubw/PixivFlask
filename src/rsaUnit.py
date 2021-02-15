@@ -39,7 +39,7 @@ class myRSA:
         self.__scheduler.start()
 
     def newkeys(self):
-        logger.info("创建公私钥对")
+        logger.debug("创建公私钥对")
         rsa = RSA.generate(1024, self.__RANDOM_GENERATOR)
         self.__PRIVATE_PEM = rsa.exportKey()
         logger.debug(str(self.__PRIVATE_PEM))
